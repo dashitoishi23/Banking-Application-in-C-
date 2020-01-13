@@ -6,9 +6,9 @@ namespace Banking_Application
 {
     class Account
     {
-        public string UserID;
-        public string AccountID;
-        public double Funds;
+        public string UserID { get; set; }
+        public string AccountID { get; set; }
+        public double Funds { get; set; }
 
         public Account(string UserID, string AccountID, double Funds)
         {

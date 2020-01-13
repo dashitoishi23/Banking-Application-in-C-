@@ -9,8 +9,8 @@ namespace Banking_Application
 
     class Manager
     {
-        public string UserID;
-        public string Password;
+        public string UserID { get; set; }
+        public string Password { get; set; }
         public List<Bank> Banks = new List<Bank>();
         public List<Bankstaff> BankStaffs = new List<Bankstaff>();
 

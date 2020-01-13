@@ -6,9 +6,9 @@ namespace Banking_Application
 {
     class Currencies
     {
-        public string Name;
-        public int ExchangeRate;
-        public bool IsDefault;
+        public string Name { get; set; }
+        public int ExchangeRate { get; set; }
+        public bool IsDefault { get; set; }
 
         public Currencies(string Name, int ExchangeRate, bool IsDefault)
         {

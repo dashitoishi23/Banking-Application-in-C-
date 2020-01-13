@@ -6,11 +6,11 @@ namespace Banking_Application
 {
     class Transactions
     {
-       public string TransactionID;
-       public DateTime TransactionDate;
-       public double Amount;
-       public string From;
-       public string To;
+       public string TransactionID { get; set; }
+       public DateTime TransactionDate { get; set; }
+       public double Amount { get; set; }
+       public string From { get; set; }
+       public string To { get; set; }
 
         public Transactions()
         {

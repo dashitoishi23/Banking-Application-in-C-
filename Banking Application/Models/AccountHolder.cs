@@ -8,13 +8,13 @@ namespace Banking_Application
     class AccountHolder
     {
         public string AccountID { get; set; }
-        public string BankID;
-        public double Funds;
-        public string UserID;
-        public string Password;
-        public string Name;
-        public string Address;
-        public string Contact;
+        public string BankID { get; set; }
+        public double Funds { get; set; }
+        public string UserID { get; set; }
+        public string Password { get; set; }
+        public string Name { get; set; }
+        public string Address { get; set; }
+        public string Contact { get; set; }
         public List<Transactions> Transactions = new List<Transactions>();
         public List<Account> Accounts = new List<Account>();
 

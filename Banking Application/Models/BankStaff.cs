@@ -6,11 +6,11 @@ namespace Banking_Application
 {
     class Bankstaff
     {
-        public string EmployeeID;
-        public string UserID;
-        public string Password;
-        public string BankName;
-        public string BankID;
+        public string EmployeeID { get; set; }
+        public string UserID { get; set; }
+        public string Password { get; set; }
+        public string BankName { get; set; }
+        public string BankID { get; set; }
 
        public Bankstaff()
         {
