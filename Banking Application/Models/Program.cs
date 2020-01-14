@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Banking_Application
 {
@@ -63,19 +63,21 @@ namespace Banking_Application
                                 string UserID = Console.ReadLine();
                                 Console.WriteLine("Enter Password");
                                 string Password = Console.ReadLine();
-                                AccountHolder holder = new AccountHolder();
-                                int flag = 1;
-                                foreach (AccountHolder accountHolder in manager.AccountHolders)
+                                Console.WriteLine("Enter Bank Name");
+                                string BankName = Console.ReadLine();
+                                IEnumerable<Bank> QueryToFindBank =
+                                    from bank in manager.Banks
+                                    where bank.BankName == BankName
+                                    select bank;
+                                Bank BankToLogin = QueryToFindBank.ElementAt(0);
+                                IEnumerable<AccountHolder> QueryToFindUser =
+                                    from holder in BankToLogin.AccountHolders
+                                    where holder.UserID == UserID && holder.Password == Password
+                                    select holder;
+                                if (QueryToFindUser.Count()>0)
                                 {
-                                    if (accountHolder.UserID == UserID && accountHolder.Password == Password)
-                                    {
-                                        holder = accountHolder;
-                                        flag = 0;
-                                        break;
-                                    }
-                                }
-                                if (flag == 0)
-                                {
+                                    AccountHolder UserAction = QueryToFindUser.ElementAt(0);
+                                    Console.WriteLine("Logged In Succesfully");
                                     Console.WriteLine("1.Deposit Money");
                                     Console.WriteLine("2. Withdraw Money");
                                     Console.WriteLine("3. Transfer Funds");
@@ -87,12 +89,12 @@ namespace Banking_Application
                                         case 1:
                                             Console.WriteLine("How much To deposit?");
                                             int FundsToDeposit = Console.Read();
-                                            holder.DepositAmount(FundsToDeposit);
+                                            UserAction.DepositAmount(FundsToDeposit);
                                             break;
                                         case 2:
                                             Console.WriteLine("How much To withdraw");
                                             int FundsToWithdraw = Console.Read();
-                                            double FundsRemaining = holder.WithdrawAmount(FundsToWithdraw);
+                                            double FundsRemaining = UserAction.WithdrawAmount(FundsToWithdraw);
                                             if (FundsRemaining == 0)
                                             {
                                                 Console.WriteLine("Insuficient Funds");
@@ -118,59 +120,73 @@ namespace Banking_Application
                                                     Console.WriteLine("Bank ID To transfer To");
                                                     string BankIDToTransfer = Console.ReadLine();
                                                     double charges = 0;
-                                                    if (BankIDToTransfer == holder.BankID)
+                                                    if (BankIDToTransfer == UserAction.BankID)
                                                         charges = 0;
                                                     else
-                                                        charges = 0.2 * FundsToTranfer;
+                                                        charges = BankToLogin.RTGSOwnBank * FundsToTranfer;
                                                     FundsToTranfer += (int)charges;
-                                                    foreach (AccountHolder hold in manager.AccountHolders)
-                                                    {
-                                                        if (hold.AccountID == AccountIDToTransfer && hold.BankID == BankIDToTransfer)
-                                                        {
-                                                            hold.Funds += FundsToTranfer;
-                                                            holder.Funds -= FundsToTranfer;
-                                                            break;
-                                                        }
-                                                    }
+                                                    IEnumerable<Bank> QueryToFindAccount =
+                                                        from BankToSelect in manager.Banks
+                                                        where BankToSelect.BankID == BankIDToTransfer
+                                                        select BankToSelect;
+                                                    Bank BankSelected = QueryToFindAccount.ElementAt(0);
+                                                    IEnumerable<Account> QueryToFIndHolder =
+                                                        from AccountSelected in BankSelected.Accounts
+                                                        where AccountSelected.AccountID == AccountIDToTransfer
+                                                        select AccountSelected;
+                                                    QueryToFIndHolder.ElementAt(0).Funds += FundsToTranfer;
+                                                    IEnumerable<Account> QueryToFindDebitor =
+                                                        from accounts in BankToLogin.Accounts
+                                                        where accounts.AccountID == UserAction.AccountID
+                                                        select accounts;
+                                                    QueryToFindDebitor.ElementAt(0).Funds -= FundsToTranfer;
                                                     break;
                                                 case 2:
                                                     Console.WriteLine("Funds To transfer");
-                                                    int FundsToTranferIMPS = Console.Read();
+                                                    FundsToTranfer = Console.Read();
                                                     Console.WriteLine("AccountID To trasnfer To");
-                                                    string AccountIDToTransferIMPS = Console.ReadLine();
+                                                    AccountIDToTransfer = Console.ReadLine();
                                                     Console.WriteLine("Bank ID To transfer To");
-                                                    string BankIDToTransferIMPS = Console.ReadLine();
-                                                    double chargesIMPS = 0;
-                                                    if (BankIDToTransferIMPS == holder.BankID)
-                                                        chargesIMPS = 0.5 * FundsToTranferIMPS;
+                                                    BankIDToTransfer = Console.ReadLine();
+                                                    charges = 0;
+                                                    if (BankIDToTransfer == UserAction.BankID)
+                                                        charges = BankToLogin.IMPSOwnBank * FundsToTranfer;
                                                     else
-                                                        chargesIMPS = 0.6 * FundsToTranferIMPS;
-                                                    FundsToTranferIMPS += (int)chargesIMPS;
-                                                    foreach (AccountHolder hold in manager.AccountHolders)
-                                                    {
-                                                        if (hold.AccountID == AccountIDToTransferIMPS && hold.BankID == BankIDToTransferIMPS)
-                                                        {
-                                                            hold.Funds += FundsToTranferIMPS;
-                                                            holder.Funds -= FundsToTranferIMPS;
-                                                            break;
-                                                        }
-                                                    }
+                                                        charges = BankToLogin.IMPSOtherBank * FundsToTranfer;
+                                                    FundsToTranfer += (int)charges;
+                                                    QueryToFindAccount =
+                                                        from BankToSelect in manager.Banks
+                                                        where BankToSelect.BankID == BankIDToTransfer
+                                                        select BankToSelect;
+                                                    BankSelected = QueryToFindAccount.ElementAt(0);
+                                                    QueryToFIndHolder =
+                                                        from AccountSelected in BankSelected.Accounts
+                                                        where AccountSelected.AccountID == AccountIDToTransfer
+                                                        select AccountSelected;
+                                                    QueryToFIndHolder.ElementAt(0).Funds += FundsToTranfer;
+                                                    QueryToFindDebitor =
+                                                        from accounts in BankToLogin.Accounts
+                                                        where accounts.AccountID == UserAction.AccountID
+                                                        select accounts;
+                                                    QueryToFindDebitor.ElementAt(0).Funds -= FundsToTranfer;
                                                     break;
-                                                case 4:
-                                                    Console.WriteLine("Your Transactions are:-");
-                                                    Transactions[] TransactionsToDisplay = holder.viewTransactions();
-                                                    foreach (Transactions transactionToDisplay in TransactionsToDisplay)
-                                                    {
-                                                        Console.WriteLine("TransactionID : " + transactionToDisplay.TransactionID);
-                                                        Console.WriteLine("Date of transaction: " + transactionToDisplay.TransactionDate);
-                                                        Console.WriteLine("Funds Transferred: " + transactionToDisplay.Amount);
-                                                        Console.WriteLine("Beneficiary: " + transactionToDisplay.To);
-                                                    }
-                                                    break;
-
-
                                             }
                                             break;
+                                            case 4:
+                                                Console.WriteLine("Your Transactions are:-");
+                                                List<Transactions> TransactionsToDisplay = UserAction.viewTransactions();
+                                                foreach (Transactions transactionToDisplay in TransactionsToDisplay)
+                                                {
+                                                    Console.WriteLine("TransactionID : " + transactionToDisplay.TransactionID);
+                                                    Console.WriteLine("Date of transaction: " + transactionToDisplay.TransactionDate);
+                                                    Console.WriteLine("Funds Transferred: " + transactionToDisplay.Amount);
+                                                    Console.WriteLine("Beneficiary: " + transactionToDisplay.To);
+                                                }
+                                                break;
+
+
+                                            
+             
 
 
                                     }
@@ -189,18 +205,19 @@ namespace Banking_Application
                                 UserID = Console.ReadLine();
                                 Console.WriteLine("Enter Password");
                                 Password = Console.ReadLine();
+                                Console.WriteLine("Enter Bank Name");
+                                BankName = Console.ReadLine();
                                 Bankstaff staffHandler = new Bankstaff();
-                                int fl = 1;
-                                foreach (Bankstaff staff in manager.BankStaffs)
-                                {
-                                    if (staff.UserID == UserID && staff.Password == Password)
-                                    {
-                                        staffHandler = staff;
-                                        fl = 0;
-                                        break;
-                                    }
-                                }
-                                if (fl == 0)
+                                QueryToFindBank =
+                                    from bank in manager.Banks
+                                    where bank.BankName == BankName
+                                    select bank;
+                                BankToLogin = QueryToFindBank.ElementAt(0);
+                                IEnumerable<Bankstaff> QueryToFindBankStaff =
+                                    from holder in BankToLogin.BankStaffs
+                                    where holder.UserID == UserID && holder.Password == Password
+                                    select holder;
+                                if (QueryToFindBankStaff.Count() > 0)
                                 {
                                     Console.WriteLine("1. Create Account");
                                     Console.WriteLine("2. Update Account");
@@ -214,16 +231,16 @@ namespace Banking_Application
                                     switch (userInput)
                                     {
                                         case 1:
-                                            Console.WriteLine("What is your Name");
+                                            Console.WriteLine("Enter name");
                                             string accountName = Console.ReadLine();
-                                            Console.WriteLine("Enter user ID");
+                                            Console.WriteLine("Enter a user iD");
                                             UserID = Console.ReadLine();
-                                            foreach(AccountHolder accountHold in manager.AccountHolders)
+                                            foreach(AccountHolder accountHold in BankToLogin.AccountHolders)
                                             {
                                                 if(accountHold.UserID == UserID)
                                                 {
                                                     Account newAccount = staffHandler.CreateAccount(accountName, UserID);
-                                                    manager.Accounts.Add(newAccount);
+                                                    BankToLogin.Accounts.Add(newAccount);
                                                     break;
                                                 }
                                             }
@@ -231,24 +248,24 @@ namespace Banking_Application
                                         case 2:
                                             Console.WriteLine("Enter account ID");
                                             string AccountID = Console.ReadLine();
-                                            foreach(Account account in manager.Accounts)
+                                            foreach(Account account in BankToLogin.Accounts)
                                             {
                                                 if(account.AccountID == AccountID)
                                                 {
                                                     Account tempAccount = staffHandler.UpdateAccount(account);
-                                                    manager.Accounts.Remove(account);
-                                                    manager.Accounts.Add(tempAccount);
+                                                    BankToLogin.Accounts.Remove(account);
+                                                    BankToLogin.Accounts.Add(tempAccount);
                                                 }
                                             }
                                             break;
                                         case 3:
                                             Console.WriteLine("Enter account ID");
                                             AccountID = Console.ReadLine();
-                                            foreach(Account account in manager.Accounts)
+                                            foreach(Account account in BankToLogin.Accounts)
                                             {
                                                 if(account.AccountID == AccountID)
                                                 {
-                                                    manager.Accounts.Remove(account);
+                                                    BankToLogin.Accounts.Remove(account);
                                                     Console.WriteLine("Account deleted :)");
                                                 }
                                             }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Banking_Application
 {
@@ -12,7 +11,6 @@ namespace Banking_Application
         public string UserID { get; set; }
         public string Password { get; set; }
         public List<Bank> Banks = new List<Bank>();
-        public List<Bankstaff> BankStaffs = new List<Bankstaff>();
 
         public Bank CreateBank(string Name)
         {
@@ -46,26 +44,17 @@ namespace Banking_Application
                 Console.WriteLine("Enter Password");
                 string Password = Console.ReadLine();
                 string BankID = "";
-                int flag = 0;
-                foreach(Bank bank in Banks)
-                {
-                      if(bank.BankName == BankName)
-                    {
-                        BankID = bank.BankName.Substring(0, 3) + DateTime.Now.ToString();
-                        flag = 1;
-                        AccountHolder newAccountHolder = new AccountHolder(AccountID, BankID, 0, UserID, Password, Name, Address, Contact);
-                        AccountHolders.Add(newAccountHolder);
-                        bank.AccountHolders.Add(newAccountHolder);
-                        Account account = new Account(UserID, AccountID, 0);
-                        bank.Accounts.Add(account);
-                        break;
-                    }
 
-                }
-                if(flag == 0)
-                {
-                    Console.WriteLine("No bank exists!!");
-                }
+                IEnumerable<Bank> LINQQuery =
+                    from bank in Banks
+                    where bank.BankName == BankName
+                    select bank;
+                Bank BankFound = LINQQuery.ElementAt<Bank>(0);
+                BankID = BankFound.BankID;
+                AccountHolder NewHolder = new AccountHolder(AccountID, BankID, 0, UserID, Password, Name, Address, Contact);
+                BankFound.AccountHolders.Add(NewHolder);
+                Console.WriteLine("Account Holder created succesfully");
+
             }
             else
             {
@@ -86,17 +75,16 @@ namespace Banking_Application
                 Console.WriteLine("Enter a bank Name");
                 string BankName = Console.ReadLine();
                 string BankID = "";
-                foreach(Bank bank in Banks)
-                {
-                    if(bank.BankName == BankName)
-                    {
-                        BankID = bank.BankID;
-                        Bankstaff newStaff = new Bankstaff(EmployeeID, BankName, BankID, UserID, Password);
-                        this.BankStaffs.Add(newStaff);
-                        bank.BankStaffs.Add(newStaff);
-                        Console.WriteLine("Bank user created with ID " + EmployeeID);
-                    }
-                }
+                IEnumerable<Bank> AddBankStaffLINQQuery =
+                    from BankConsidered in Banks
+                    where BankConsidered.BankName == BankName
+                    select BankConsidered;
+                Bank bank = AddBankStaffLINQQuery.ElementAt<Bank>(0);
+                BankID = bank.BankID;
+                Bankstaff NewStaff = new Bankstaff(EmployeeID, BankName, BankID, UserID, Password);
+                bank.BankStaffs.Add(NewStaff);
+                Console.WriteLine("Bankstaff created succesfully");
+               
 
             }
         }

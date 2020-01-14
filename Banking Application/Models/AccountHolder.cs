@@ -18,10 +18,6 @@ namespace Banking_Application
         public List<Transactions> Transactions = new List<Transactions>();
         public List<Account> Accounts = new List<Account>();
 
-        public AccountHolder()
-        {
-
-        }
 
         public AccountHolder(string UserID, string Password)
         {
@@ -74,9 +70,9 @@ namespace Banking_Application
             Console.WriteLine("Successful");
 
         }
-        public Transactions[] viewTransactions()
+        public List<Transactions> viewTransactions()
         {
-            return this.Transactions.ToArray();
+            return this.Transactions;
         }
 
     }
